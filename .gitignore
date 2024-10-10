@@ -12,6 +12,6 @@ __pycache__/
 *.log
 
 # Virtual environments (if used)
+nasa_env/
 venv/
-ENV/
 env/
