@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 # =======================
 
 # Specify the path to the .env file
-load_dotenv("C:/Users/david/nasa_env/.env")
+load_dotenv("C:/Users/david/nasa_project/.env")
 
 # Set up logging
 logging.basicConfig(
