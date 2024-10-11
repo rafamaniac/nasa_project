@@ -1,39 +1,49 @@
-name: Refresh NASA Mars Rover Data
+name: Refresh NASA Data
 
 on:
   schedule:
     - cron: "*/15 * * * *"  # Runs every 15 minutes
-  workflow_dispatch:  # Allows manual triggering
+  workflow_dispatch:        # Allows manual triggering
 
 jobs:
   fetch_and_insert:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout the repository
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      # Step 2: Set up Python environment
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'  # Specify the Python version you need
+          python-version: '3.12'  # Use the Python version you need
 
+      # Step 3: Install the Microsoft ODBC Driver for SQL Server
+      - name: Install Microsoft ODBC Driver for SQL Server
+        run: |
+          # Import the Microsoft repository GPG keys
+          curl https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/microsoft.asc.gpg
+
+          # Register the Microsoft Ubuntu repository
+          curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
+
+          # Update package lists
+          sudo apt-get update
+
+          # Install the ODBC driver accepting the EULA
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql17
+        shell: bash
+
+      # Step 4: Install Python dependencies
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Install ODBC Driver for SQL Server
-        run: |
-          # Install the Microsoft ODBC Driver for SQL Server
-          sudo su
-          curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
-          curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list > /etc/apt/sources.list.d/mssql-release.list
-          exit
-          sudo apt-get update
-          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql17
-
-      - name: Run Python Script
+      # Step 5: Run the Python script
+      - name: Run Script
         env:
           NASA_API_KEY: ${{ secrets.NASA_API_KEY }}
           DB_DRIVER: ${{ secrets.DB_DRIVER }}
