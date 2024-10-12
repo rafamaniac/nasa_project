@@ -20,49 +20,11 @@ jobs:
         with:
           python-version: '3.12'  # Ensure this matches your local Python version
 
-      # Step 3A: Uninstall existing Microsoft ODBC Driver 18 for SQL Server if present
-      - name: Uninstall Existing Microsoft ODBC Driver 18 for SQL Server
+      # Step 3: Install Microsoft ODBC Driver for SQL Server without Chocolatey
+      - name: Install Microsoft ODBC Driver for SQL Server
         run: |
-          $driverName = 'ODBC Driver 18 for SQL Server'
-          $registryPath = 'HKLM:\SOFTWARE\ODBC\ODBCINST.INI\ODBC Drivers'
-          $installed = Get-ItemProperty -Path $registryPath -Name $driverName -ErrorAction SilentlyContinue
-          
-          if ($installed.$driverName -eq 'Installed') {
-            Write-Host "Existing $driverName detected. Attempting to uninstall."
-            
-            # Retrieve the product code for uninstallation
-            $product = Get-WmiObject -Query "SELECT * FROM Win32_Product WHERE Name = 'Microsoft ODBC Driver 18 for SQL Server'"
-            
-            if ($product) {
-              $product.Uninstall()
-              Write-Host "Successfully uninstalled existing $driverName."
-            } else {
-              Write-Host "Could not find the product code for $driverName. Skipping uninstallation."
-            }
-          } else {
-            Write-Host "No existing installation of $driverName found."
-          }
-        shell: powershell
-
-      # Step 3B: Install Microsoft ODBC Driver 18 for SQL Server without Chocolatey
-      - name: Install Microsoft ODBC Driver 18 for SQL Server
-        run: |
-          # Create C:\Temp directory if it doesn't exist
-          $tempDir = "C:\Temp"
-          if (-Not (Test-Path -Path $tempDir)) {
-            New-Item -ItemType Directory -Path $tempDir -Force
-            Write-Host "Created directory $tempDir"
-          } else {
-            Write-Host "Directory $tempDir already exists."
-          }
-
-          # Redirect TEMP and TMP to C:\Temp to avoid issues with D:\
-          $env:TEMP = $tempDir
-          $env:TMP = $tempDir
-          Write-Host "Redirected TEMP and TMP to $tempDir"
-
           # Define the URL for the ODBC Driver 18 MSI installer
-          $msiUrl = 'https://go.microsoft.com/fwlink/?linkid=2280794'  # Ensure this URL is up-to-date
+          $msiUrl = 'https://go.microsoft.com/fwlink/?linkid=2280794'  # Update this URL if needed
           
           # Define the path where the MSI will be downloaded
           $msiPath = "$env:TEMP\msodbcsql18.msi"
@@ -70,71 +32,26 @@ jobs:
           Write-Host "Downloading Microsoft ODBC Driver 18 for SQL Server from $msiUrl"
           
           # Download the MSI installer
-          Invoke-WebRequest -Uri $msiUrl -OutFile $msiPath -UseBasicParsing
+          Invoke-WebRequest -Uri $msiUrl -OutFile $msiPath
 
           Write-Host "Installing Microsoft ODBC Driver 18 for SQL Server"
           
-          # Install the MSI silently with detailed logging
-          $logPath = "$env:TEMP\msodbcsql18_install.log"
-          Start-Process msiexec.exe -ArgumentList "/i `"$msiPath`" /quiet /norestart /log `"$logPath`"" -Wait -NoNewWindow
+          # Install the MSI silently
+          Start-Process msiexec.exe -ArgumentList "/i `"$msiPath`" /quiet /norestart" -Wait
 
-          Write-Host "Installation complete. Log available at $logPath"
-
-          # Display the last few lines of the log for quick debugging
-          Write-Host "Displaying the last 20 lines of the installation log:"
-          Get-Content $logPath -Tail 20
-
-          # Upload the log as an artifact for further analysis
-          mkdir "$env:GITHUB_WORKSPACE\logs" -Force
-          Copy-Item $logPath "$env:GITHUB_WORKSPACE\logs\"
+          Write-Host "Installation complete. Removing installer."
 
           # Remove the MSI installer after installation
           Remove-Item $msiPath -Force
 
-          # Verify installation using Registry
-          $driverName = 'ODBC Driver 18 for SQL Server'
-          $registryPath = 'HKLM:\SOFTWARE\ODBC\ODBCINST.INI\ODBC Drivers'
-          $installed = Get-ItemProperty -Path $registryPath -Name $driverName -ErrorAction SilentlyContinue
+          # Verify installation
+          $driver = 'ODBC Driver 18 for SQL Server'
+          $installed = Get-OdbcDriver | Where-Object { $_.Name -eq $driver }
 
-          if ($installed.$driverName -eq 'Installed') {
-            Write-Host "$driverName has been successfully installed."
+          if ($installed) {
+            Write-Host "$driver has been successfully installed."
           } else {
-            Write-Error "Failed to install $driverName via direct download."
-            exit 1
-          }
-        shell: powershell
-
-      # Step 3C: Upload the installation log as an artifact
-      - name: Upload ODBC Driver Installation Log
-        if: failure() || always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: odbc-install-log
-          path: logs/msodbcsql18_install.log
-
-      # Step 3D: Verify Winget Installation
-      - name: Verify Winget Installation
-        run: |
-          Write-Host "Checking if Winget is installed..."
-          winget --version
-        shell: powershell
-
-      # Step 3E: Install Microsoft ODBC Driver 18 for SQL Server via Winget (If Winget is Available)
-      - name: Install Microsoft ODBC Driver 18 for SQL Server via Winget
-        if: success()  # This step runs only if Winget is available
-        run: |
-          Write-Host "Attempting to install Microsoft ODBC Driver 18 for SQL Server using Winget"
-          winget install --id Microsoft.ODBC.Driver.18.for.SQL.Server -e --silent
-          
-          # Verify installation using Registry
-          $driverName = 'ODBC Driver 18 for SQL Server'
-          $registryPath = 'HKLM:\SOFTWARE\ODBC\ODBCINST.INI\ODBC Drivers'
-          $installed = Get-ItemProperty -Path $registryPath -Name $driverName -ErrorAction SilentlyContinue
-
-          if ($installed.$driverName -eq 'Installed') {
-            Write-Host "$driverName has been successfully installed via Winget."
-          } else {
-            Write-Error "Failed to install $driverName via Winget."
+            Write-Error "Failed to install $driver."
             exit 1
           }
         shell: powershell
