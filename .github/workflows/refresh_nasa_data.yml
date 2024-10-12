@@ -20,10 +20,40 @@ jobs:
         with:
           python-version: '3.12'  # Ensure this matches your local Python version
 
-      # Step 3: Install Microsoft ODBC Driver for SQL Server on Windows
+      # Step 3: Install Microsoft ODBC Driver for SQL Server without Chocolatey
       - name: Install Microsoft ODBC Driver for SQL Server
         run: |
-          choco install -y msodbcsql18
+          # Define the URL for the ODBC Driver 18 MSI installer
+          $msiUrl = 'https://go.microsoft.com/fwlink/?linkid=2156522'  # Update this URL if needed
+          
+          # Define the path where the MSI will be downloaded
+          $msiPath = "$env:TEMP\msodbcsql18.msi"
+
+          Write-Host "Downloading Microsoft ODBC Driver 18 for SQL Server from $msiUrl"
+          
+          # Download the MSI installer
+          Invoke-WebRequest -Uri $msiUrl -OutFile $msiPath
+
+          Write-Host "Installing Microsoft ODBC Driver 18 for SQL Server"
+          
+          # Install the MSI silently
+          Start-Process msiexec.exe -ArgumentList "/i `"$msiPath`" /quiet /norestart" -Wait
+
+          Write-Host "Installation complete. Removing installer."
+
+          # Remove the MSI installer after installation
+          Remove-Item $msiPath -Force
+
+          # Verify installation
+          $driver = 'ODBC Driver 18 for SQL Server'
+          $installed = Get-OdbcDriver | Where-Object { $_.Name -eq $driver }
+
+          if ($installed) {
+            Write-Host "$driver has been successfully installed."
+          } else {
+            Write-Error "Failed to install $driver."
+            exit 1
+          }
         shell: powershell
 
       # Step 4: Install Python dependencies
