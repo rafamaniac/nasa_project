@@ -23,7 +23,7 @@ jobs:
       # Step 3: Install Microsoft ODBC Driver for SQL Server on Windows
       - name: Install Microsoft ODBC Driver for SQL Server
         run: |
-          choco install -y microsoft-odbc-driver-18-for-sql-server
+          choco install -y msodbcsql18
         shell: powershell
 
       # Step 4: Install Python dependencies
