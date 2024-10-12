@@ -67,11 +67,13 @@ def fetch_nasa_mars_rover_photos(sol=1000):
 def connect_to_sql_server():
     driver = os.getenv('DB_DRIVER')
     server = os.getenv('DB_SERVER')
+    port = os.getenv('DB_PORT')  # Get the port from the environment
     database = os.getenv('DB_DATABASE')
     username = os.getenv('DB_USERNAME')
     password = os.getenv('DB_PASSWORD')
-    
-    missing_vars = [var for var in ['DB_DRIVER', 'DB_SERVER', 'DB_DATABASE', 'DB_USERNAME', 'DB_PASSWORD']
+
+    # Check for missing environment variables
+    missing_vars = [var for var in ['DB_DRIVER', 'DB_SERVER', 'DB_DATABASE', 'DB_USERNAME', 'DB_PASSWORD', 'DB_PORT']
                     if not os.getenv(var)]
     
     if missing_vars:
@@ -79,20 +81,27 @@ def connect_to_sql_server():
         sys.exit(1)
     
     try:
+        # Modify the server variable to include the port (server,port format for SQL Server)
+        server_with_port = f"{server},{port}"
+
+        # Build the connection string
         connection_string = (
             f"DRIVER={driver};"
-            f"SERVER={server};"
+            f"SERVER={server_with_port};"
             f"DATABASE={database};"
             f"UID={username};"
             f"PWD={password};"
             f"TrustServerCertificate=yes;"
         )
+
+        # Establish the connection
         cnxn = pyodbc.connect(connection_string)
         logging.info("Connection to SQL Server successful.")
         return cnxn
     except pyodbc.Error as e:
         logging.error(f"Error connecting to SQL Server: {e}")
         sys.exit(1)
+
 
 # =======================
 # 3. Create Table in SQL Server
