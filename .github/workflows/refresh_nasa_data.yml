@@ -51,7 +51,7 @@ jobs:
       - name: Run Script
         env:
           NASA_API_KEY: ${{ secrets.NASA_API_KEY }}
-          DB_DRIVER: 'ODBC Driver 18 for SQL Server'  # Explicitly set the driver name
+          DB_DRIVER: ${{ secrets.DB_DRIVER }}  # Explicitly set the driver name
           DB_SERVER: ${{ secrets.DB_SERVER }}  # Preferably use IP address
           DB_PORT: ${{ secrets.DB_PORT }}
           DB_DATABASE: ${{ secrets.DB_DATABASE }}
