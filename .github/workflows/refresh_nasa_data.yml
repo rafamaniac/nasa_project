@@ -47,6 +47,20 @@ jobs:
       # Step 3B: Install Microsoft ODBC Driver 18 for SQL Server without Chocolatey
       - name: Install Microsoft ODBC Driver 18 for SQL Server
         run: |
+          # Create C:\Temp directory if it doesn't exist
+          $tempDir = "C:\Temp"
+          if (-Not (Test-Path -Path $tempDir)) {
+            New-Item -ItemType Directory -Path $tempDir -Force
+            Write-Host "Created directory $tempDir"
+          } else {
+            Write-Host "Directory $tempDir already exists."
+          }
+
+          # Redirect TEMP and TMP to C:\Temp to avoid issues with D:\
+          $env:TEMP = $tempDir
+          $env:TMP = $tempDir
+          Write-Host "Redirected TEMP and TMP to $tempDir"
+
           # Define the URL for the ODBC Driver 18 MSI installer
           $msiUrl = 'https://go.microsoft.com/fwlink/?linkid=2280794'  # Ensure this URL is up-to-date
           
@@ -71,8 +85,8 @@ jobs:
           Get-Content $logPath -Tail 20
 
           # Upload the log as an artifact for further analysis
-          mkdir $env:GITHUB_WORKSPACE\logs
-          Copy-Item $logPath $env:GITHUB_WORKSPACE\logs\
+          mkdir "$env:GITHUB_WORKSPACE\logs" -Force
+          Copy-Item $logPath "$env:GITHUB_WORKSPACE\logs\"
 
           # Remove the MSI installer after installation
           Remove-Item $msiPath -Force
