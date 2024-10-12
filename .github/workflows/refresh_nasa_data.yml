@@ -24,7 +24,7 @@ jobs:
       - name: Install Microsoft ODBC Driver for SQL Server
         run: |
           # Define the URL for the ODBC Driver 18 MSI installer
-          $msiUrl = 'https://go.microsoft.com/fwlink/?linkid=2156522'  # Update this URL if needed
+          $msiUrl = 'https://go.microsoft.com/fwlink/?linkid=2280794'  # Update this URL if needed
           
           # Define the path where the MSI will be downloaded
           $msiPath = "$env:TEMP\msodbcsql18.msi"
