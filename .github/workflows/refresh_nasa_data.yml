@@ -39,6 +39,7 @@ jobs:
           NASA_API_KEY: ${{ secrets.NASA_API_KEY }}
           DB_DRIVER: ${{ secrets.DB_DRIVER }}
           DB_SERVER: ${{ secrets.DB_SERVER }}  # Preferably use IP address
+          DB_PORT: ${{ secrets.DB_PORT }}
           DB_DATABASE: ${{ secrets.DB_DATABASE }}
           DB_USERNAME: ${{ secrets.DB_USERNAME }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
