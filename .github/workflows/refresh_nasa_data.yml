@@ -7,7 +7,7 @@ on:
 
 jobs:
   fetch_and_insert:
-    runs-on: windows-latest  # Consider using self-hosted runners if SQL Server is not publicly accessible
+    runs-on: self-hosted  # Specifies the use of a self-hosted runner
 
     steps:
       # Step 1: Checkout the repository
