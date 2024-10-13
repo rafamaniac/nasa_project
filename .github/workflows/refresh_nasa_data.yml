@@ -20,26 +20,6 @@ jobs:
         with:
           python-version: '3.12'  # Ensure this matches your local Python version
 
-      # Step 3: Install Microsoft ODBC Driver for SQL Server
-      - name: Install Microsoft ODBC Driver for SQL Server
-        run: |
-          # Define the URL for the ODBC Driver 18 MSI installer
-          $msiUrl = 'https://go.microsoft.com/fwlink/?linkid=2280794'  # Ensure this URL is correct
-          $msiPath = "$env:TEMP\msodbcsql.msi"
-
-          # Download the MSI installer
-          Invoke-WebRequest -Uri $msiUrl -OutFile $msiPath
-
-          # Install the MSI installer silently
-          Start-Process msiexec.exe -Wait -ArgumentList '/I', "`"$msiPath`"", '/quiet', '/norestart'
-
-          # Clean up the installer file
-          Remove-Item $msiPath -Force
-
-          # Verify installation by listing installed ODBC drivers
-          Get-OdbcDriver | Select Name, Driver
-        shell: powershell
-
       # Step 4: Install Python dependencies
       - name: Install Dependencies
         run: |
