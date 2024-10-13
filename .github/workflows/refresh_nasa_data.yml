@@ -7,7 +7,7 @@ on:
 
 jobs:
   fetch_and_insert:
-    runs-on: windows-latest  # Change to self-hosted if using a self-hosted runner
+    runs-on: windows-latest
 
     steps:
       # Step 1: Checkout the repository
@@ -27,28 +27,16 @@ jobs:
           pip install -r requirements.txt
         shell: powershell
 
-      # Step 4: Test SQL Server Connectivity
-      - name: Test SQL Server Connectivity
-        shell: powershell
-        run: |
-          $server = "${{ secrets.DB_SERVER }}"
-          $port = "${{ secrets.DB_PORT }}"
-          $result = Test-NetConnection -ComputerName $server -Port $port
-          $result | Format-List *
-          if (-not $result.TcpTestSucceeded) {
-            Write-Error "Cannot connect to SQL Server at $server on port $port."
-          }
-
-      # Step 5: Run the Python script
+      # Step 4: Run the Python script
       - name: Run Script
         env:
-          NASA_API_KEY: ${{ secrets.NASA_API_KEY }}
-          DB_DRIVER: ${{ secrets.DB_DRIVER }}  # 'ODBC Driver 17 for SQL Server'
-          DB_SERVER: ${{ secrets.DB_SERVER }}  # e.g., '192.168.1.100'
-          DB_PORT: ${{ secrets.DB_PORT }}      # e.g., '1433'
-          DB_DATABASE: ${{ secrets.DB_DATABASE }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          NASA_API_KEY: 3cDkIePArsYkyDlDbnBM1DHGkeUbWqVme0asj27W
+          DB_DRIVER: "{ODBC Driver 17 for SQL Server}"
+          DB_SERVER: David
+          DB_PORT: 1433
+          DB_DATABASE: nasa_db
+          DB_USERNAME: sa
+          DB_PASSWORD: ummalter
         shell: powershell
         run: |
           # Print available ODBC drivers for debugging
