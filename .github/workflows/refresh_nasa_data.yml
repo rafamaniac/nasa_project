@@ -7,7 +7,7 @@ on:
 
 jobs:
   fetch_and_insert:
-    runs-on: windows-latest
+    runs-on: windows-latest  # Change to self-hosted if using a self-hosted runner
 
     steps:
       # Step 1: Checkout the repository
@@ -27,7 +27,19 @@ jobs:
           pip install -r requirements.txt
         shell: powershell
 
-      # Step 4: Run the Python script
+      # Step 4: Test SQL Server Connectivity
+      - name: Test SQL Server Connectivity
+        shell: powershell
+        run: |
+          $server = "${{ secrets.DB_SERVER }}"
+          $port = "${{ secrets.DB_PORT }}"
+          $result = Test-NetConnection -ComputerName $server -Port $port
+          $result | Format-List *
+          if (-not $result.TcpTestSucceeded) {
+            Write-Error "Cannot connect to SQL Server at $server on port $port."
+          }
+
+      # Step 5: Run the Python script
       - name: Run Script
         env:
           NASA_API_KEY: ${{ secrets.NASA_API_KEY }}
