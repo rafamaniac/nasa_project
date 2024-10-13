@@ -31,8 +31,8 @@ jobs:
       - name: Test SQL Server Connectivity
         shell: powershell
         run: |
-          $server = "192.168.2.152"    # Replace with actual server name or IP address
-          $port = "1433"       # Ensure this is the correct port
+          $server = "${{ secrets.DB_SERVER }}"    # SQL Server IP address or hostname
+          $port = "${{ secrets.DB_PORT }}"        # SQL Server port
           $result = Test-NetConnection -ComputerName $server -Port $port
           $result | Format-List *
           if (-not $result.TcpTestSucceeded) {
@@ -42,13 +42,13 @@ jobs:
       # Step 5: Run the Python script
       - name: Run Script
         env:
-          NASA_API_KEY: 3cDkIePArsYkyDlDbnBM1DHGkeUbWqVme0asj27W
-          DB_DRIVER: "{ODBC Driver 17 for SQL Server}"
-          DB_SERVER: 192.168.2.152
-          DB_PORT: 1433
-          DB_DATABASE: nasa_db
-          DB_USERNAME: sa
-          DB_PASSWORD: ummalter
+          NASA_API_KEY: ${{ secrets.NASA_API_KEY }}
+          DB_DRIVER: ${{ secrets.DB_DRIVER }}
+          DB_SERVER: ${{ secrets.DB_SERVER }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_DATABASE: ${{ secrets.DB_DATABASE }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         shell: powershell
         run: |
           # Print available ODBC drivers for debugging
