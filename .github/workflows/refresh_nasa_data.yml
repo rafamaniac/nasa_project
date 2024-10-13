@@ -47,11 +47,17 @@ jobs:
           pip install -r requirements.txt
         shell: powershell
 
+      # Step 4.1: List ODBC drivers for debugging
+      - name: List ODBC Drivers
+        run: |
+          python -c "import pyodbc; print('Available ODBC Drivers:', pyodbc.drivers())"
+        shell: powershell
+
       # Step 5: Run the Python script
       - name: Run Script
         env:
           NASA_API_KEY: ${{ secrets.NASA_API_KEY }}
-          DB_DRIVER: ${{ secrets.DB_DRIVER }}  # Explicitly set the driver name
+          DB_DRIVER: ${{ secrets.DB_DRIVER }}  # Ensure this matches the installed driver
           DB_SERVER: ${{ secrets.DB_SERVER }}  # Preferably use IP address
           DB_PORT: ${{ secrets.DB_PORT }}
           DB_DATABASE: ${{ secrets.DB_DATABASE }}
