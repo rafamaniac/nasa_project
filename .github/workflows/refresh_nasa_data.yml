@@ -32,7 +32,7 @@ jobs:
         env:
           NASA_API_KEY: 3cDkIePArsYkyDlDbnBM1DHGkeUbWqVme0asj27W
           DB_DRIVER: "{ODBC Driver 17 for SQL Server}"
-          DB_SERVER: David
+          DB_SERVER: 192.168.2.152
           DB_PORT: 1433
           DB_DATABASE: nasa_db
           DB_USERNAME: sa
