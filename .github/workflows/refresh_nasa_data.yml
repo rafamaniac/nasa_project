@@ -7,78 +7,32 @@ on:
 
 jobs:
   fetch_and_insert:
-    runs-on: self-hosted  # Specifies the use of a self-hosted runner named DAVID
+    runs-on: self-hosted
 
     steps:
       # Step 1: Checkout the repository
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # Step 2: Clean Up Any Corrupted Python Installations
-      - name: Clean Up Corrupted Python Installations
-        shell: powershell
-        run: |
-          $python_version = "3.12.7"
-          $python_path = "C:\actions-runner\_work\_tool\Python\$python_version\x64"
-          
-          if (Test-Path $python_path) {
-              Write-Host "Corrupted Python installation found at $python_path. Removing..."
-              Remove-Item -Recurse -Force $python_path
-              Write-Host "Removed corrupted Python installation."
-          } else {
-              Write-Host "No corrupted Python installation found at $python_path. Skipping cleanup."
-          }
-
-      # Step 3: Set up Python environment
+      # Step 2: Set up Python environment
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.12'  # Ensure this matches your local Python version
+          python-version: '3.12.2'  # Ensure this matches your local Python version
 
-      # Step 4: Verify Python and pip Installation
-      - name: Verify Python and pip Installation
-        shell: powershell
-        run: |
-          python --version
-          pip --version
-
-      # Step 5: Install pip (If Necessary)
-      - name: Install pip
-        shell: powershell
-        run: |
-          python -m ensurepip --upgrade
-          python -m pip install --upgrade pip
-
-      # Step 6: Install Python dependencies
+      # Step 3: Install Python dependencies
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
         shell: powershell
 
-      # Step 7: Test SQL Server Connectivity
-      - name: Test SQL Server Connectivity
-        shell: powershell
-        run: |
-          $server = "${{ secrets.DB_SERVER }}"    # SQL Server IP address or hostname
-          $port = "${{ secrets.DB_PORT }}"        # SQL Server port
-          
-          Write-Host "Testing connectivity to SQL Server at $server on port $port..."
-          $result = Test-NetConnection -ComputerName $server -Port $port
-          $result | Format-List *
-          
-          if (-not $result.TcpTestSucceeded) {
-            Write-Error "Cannot connect to SQL Server at $server on port $port."
-          } else {
-            Write-Host "Successfully connected to SQL Server at $server on port $port."
-          }
-
-      # Step 8: Run the Python script
+      # Step 4: Run the Python script
       - name: Run Script
         env:
           NASA_API_KEY: ${{ secrets.NASA_API_KEY }}
-          DB_DRIVER: ${{ secrets.DB_DRIVER }}
-          DB_SERVER: ${{ secrets.DB_SERVER }}
+          DB_DRIVER: ${{ secrets.DB_DRIVER }}  # Explicitly set the driver name
+          DB_SERVER: ${{ secrets.DB_SERVER }}  # Preferably use IP address
           DB_PORT: ${{ secrets.DB_PORT }}
           DB_DATABASE: ${{ secrets.DB_DATABASE }}
           DB_USERNAME: ${{ secrets.DB_USERNAME }}
