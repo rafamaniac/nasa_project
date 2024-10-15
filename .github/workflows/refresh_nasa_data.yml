@@ -18,7 +18,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.12.2'  # Ensure this matches your local Python version
+          python-version: '3.13'  # Ensure this matches your local Python version
 
       # Step 3: Install Python dependencies
       - name: Install Dependencies
