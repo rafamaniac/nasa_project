@@ -7,18 +7,19 @@ on:
 
 jobs:
   fetch_and_insert:
-    runs-on: self-hosted
+    runs-on: self-hosted  # Specifies the use of a self-hosted runner named DAVID
 
     steps:
       # Step 1: Checkout the repository
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # Step 2: Set up Python environment
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.13'  # Ensure this matches your local Python version
+      # Step 2: Verify Python and pip Installation
+      - name: Verify Python and pip Installation
+        shell: powershell
+        run: |
+          python --version
+          pip --version
 
       # Step 3: Install Python dependencies
       - name: Install Dependencies
@@ -27,12 +28,29 @@ jobs:
           pip install -r requirements.txt
         shell: powershell
 
-      # Step 4: Run the Python script
+      # Step 4: Test SQL Server Connectivity
+      - name: Test SQL Server Connectivity
+        shell: powershell
+        run: |
+          $server = "${{ secrets.DB_SERVER }}"    # SQL Server IP address or hostname
+          $port = "${{ secrets.DB_PORT }}"        # SQL Server port
+          
+          Write-Host "Testing connectivity to SQL Server at $server on port $port..."
+          $result = Test-NetConnection -ComputerName $server -Port $port
+          $result | Format-List *
+          
+          if (-not $result.TcpTestSucceeded) {
+            Write-Error "Cannot connect to SQL Server at $server on port $port."
+          } else {
+            Write-Host "Successfully connected to SQL Server at $server on port $port."
+          }
+
+      # Step 5: Run the Python script
       - name: Run Script
         env:
           NASA_API_KEY: ${{ secrets.NASA_API_KEY }}
-          DB_DRIVER: ${{ secrets.DB_DRIVER }}  # Explicitly set the driver name
-          DB_SERVER: ${{ secrets.DB_SERVER }}  # Preferably use IP address
+          DB_DRIVER: ${{ secrets.DB_DRIVER }}
+          DB_SERVER: ${{ secrets.DB_SERVER }}
           DB_PORT: ${{ secrets.DB_PORT }}
           DB_DATABASE: ${{ secrets.DB_DATABASE }}
           DB_USERNAME: ${{ secrets.DB_USERNAME }}
