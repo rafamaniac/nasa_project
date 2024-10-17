@@ -1,4 +1,4 @@
-understood. powershell script is now running in task. how would you change my yml script? name: Refresh NASA Data
+name: Refresh NASA Data
 
 on:
   schedule:
