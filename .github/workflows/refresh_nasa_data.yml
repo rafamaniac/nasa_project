@@ -7,7 +7,7 @@ on:
 
 jobs:
   fetch_and_insert:
-    runs-on: windows-latest  # Specifies the use of a self-hosted runner named DAVID
+    runs-on: self-hosted  # Specifies the use of a self-hosted runner named DAVID
 
     steps:
       # Step 1: Checkout the repository
